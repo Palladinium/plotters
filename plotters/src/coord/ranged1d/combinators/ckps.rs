@@ -3,7 +3,8 @@
 // keypoint by your own code.
 use std::ops::Range;
 
-use crate::coord::ranged1d::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged};
+use crate::coord::ranged1d::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter};
+use crate::coord::types::{RangedCoordf32, RangedCoordf64};
 
 /// The coordinate decorator that binds a key point vector.
 /// Normally, all the ranged coordinate implements its own keypoint algorithm
@@ -73,6 +74,18 @@ where
 
     fn axis_pixel_range(&self, limit: (i32, i32)) -> Range<i32> {
         self.inner.axis_pixel_range(limit)
+    }
+}
+
+impl ValueFormatter<f64> for WithKeyPoints<RangedCoordf64> {
+    fn format(value: &f64) -> String {
+        RangedCoordf64::format(value)
+    }
+}
+
+impl ValueFormatter<f32> for WithKeyPoints<RangedCoordf32> {
+    fn format(value: &f32) -> String {
+        RangedCoordf32::format(value)
     }
 }
 
@@ -223,7 +236,10 @@ mod test {
         assert_eq!(range.map(&3, (0, 1000)), 30);
         assert_eq!(range.range(), 0..100);
         assert_eq!(range.key_points(BoldPoints(100)), vec![1, 2, 3]);
-        assert_eq!(range.key_points(LightPoints::new(100, 100)), vec![]);
+        assert_eq!(
+            range.key_points(LightPoints::new(100, 100)),
+            Vec::<i32>::new()
+        );
         let range = range.with_light_points(5..10);
         assert_eq!(range.key_points(BoldPoints(10)), vec![1, 2, 3]);
         assert_eq!(
@@ -251,7 +267,10 @@ mod test {
         assert_eq!(range.map(&3, (0, 1000)), 30);
         assert_eq!(range.range(), 0..100);
         assert_eq!(range.key_points(BoldPoints(100)), vec![1, 2, 3]);
-        assert_eq!(range.key_points(LightPoints::new(100, 100)), vec![]);
+        assert_eq!(
+            range.key_points(LightPoints::new(100, 100)),
+            Vec::<i32>::new()
+        );
         let range = range.with_light_point_func(|_| (5..10).collect());
         assert_eq!(range.key_points(BoldPoints(10)), vec![1, 2, 3]);
         assert_eq!(
